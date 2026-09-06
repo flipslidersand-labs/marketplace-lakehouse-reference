@@ -1,7 +1,7 @@
 # Marketplace Lakehouse Reference
 
-![CI](https://github.com/flipslidersand/marketplace-lakehouse-reference/actions/workflows/ci.yml/badge.svg)
-![Tests](https://img.shields.io/badge/tests-31%2F31%20passing-brightgreen)
+![CI](https://github.com/flipslidersand-labs/marketplace-lakehouse-reference/actions/workflows/ci.yml/badge.svg)
+![Tests](https://img.shields.io/badge/tests-42%2F42%20passing-brightgreen)
 ![Python](https://img.shields.io/badge/python-3.12-blue)
 ![License](https://img.shields.io/badge/license-Apache%202.0-green)
 
@@ -198,7 +198,7 @@ marketplace-lakehouse-reference/
 ### Quick Start (local, ~2 minutes)
 
 ```bash
-git clone https://github.com/flipslidersand/marketplace-lakehouse-reference
+git clone https://github.com/flipslidersand-labs/marketplace-lakehouse-reference
 cd marketplace-lakehouse-reference
 
 python3 -m venv .venv && source .venv/bin/activate
