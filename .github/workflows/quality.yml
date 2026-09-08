@@ -15,3 +15,8 @@ jobs:
       run-lint: false
       run-tests: false
       runner: ubuntu-latest
+
+  gitleaks:
+    permissions:
+      contents: read
+    uses: flipslidersand-labs/qa-workflows/.github/workflows/gitleaks.yml@main
