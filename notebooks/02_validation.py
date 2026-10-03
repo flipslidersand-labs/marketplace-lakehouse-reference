@@ -20,22 +20,26 @@ import sys
 sys.path.insert(0, "/Workspace/Repos/marketplace-lakehouse-reference/src")
 
 from marketplace_lakehouse.quality import quarantine_summary
-from marketplace_lakehouse.silver import process_inventory, process_orders, process_price_events
+from marketplace_lakehouse.silver import (
+    process_inventory,
+    process_orders,
+    process_price_events,
+)
 
 # COMMAND ----------
 
 BASE_PATH = "/FileStore/marketplace-lakehouse"
 
-BRONZE_ORDERS    = f"{BASE_PATH}/bronze/orders"
+BRONZE_ORDERS = f"{BASE_PATH}/bronze/orders"
 BRONZE_INVENTORY = f"{BASE_PATH}/bronze/inventory"
 BRONZE_PRICE_EVT = f"{BASE_PATH}/bronze/price_events"
 
-SILVER_ORDERS    = f"{BASE_PATH}/silver/orders"
+SILVER_ORDERS = f"{BASE_PATH}/silver/orders"
 SILVER_INVENTORY = f"{BASE_PATH}/silver/inventory"
 SILVER_PRICE_EVT = f"{BASE_PATH}/silver/price_events"
-QUAR_ORDERS      = f"{BASE_PATH}/silver/quarantined_orders"
-QUAR_INVENTORY   = f"{BASE_PATH}/silver/quarantined_inventory"
-QUAR_PRICE_EVT   = f"{BASE_PATH}/silver/quarantined_price_events"
+QUAR_ORDERS = f"{BASE_PATH}/silver/quarantined_orders"
+QUAR_INVENTORY = f"{BASE_PATH}/silver/quarantined_inventory"
+QUAR_PRICE_EVT = f"{BASE_PATH}/silver/quarantined_price_events"
 
 # COMMAND ----------
 
@@ -43,7 +47,9 @@ QUAR_PRICE_EVT   = f"{BASE_PATH}/silver/quarantined_price_events"
 
 # COMMAND ----------
 
-clean_orders, quar_orders = process_orders(spark, BRONZE_ORDERS, SILVER_ORDERS, QUAR_ORDERS)
+clean_orders, quar_orders = process_orders(
+    spark, BRONZE_ORDERS, SILVER_ORDERS, QUAR_ORDERS
+)
 print(f"Silver orders (clean):      {clean_orders.count()}")
 print(f"Silver orders (quarantine): {quar_orders.count()}")
 print("Quarantine breakdown:", quarantine_summary(quar_orders))
@@ -58,7 +64,9 @@ display(quar_orders.select("order_id", "ordered_at", "_quarantine_reason").limit
 
 # COMMAND ----------
 
-clean_inv, quar_inv = process_inventory(spark, BRONZE_INVENTORY, SILVER_INVENTORY, QUAR_INVENTORY)
+clean_inv, quar_inv = process_inventory(
+    spark, BRONZE_INVENTORY, SILVER_INVENTORY, QUAR_INVENTORY
+)
 print(f"Silver inventory (clean):      {clean_inv.count()}")
 print(f"Silver inventory (quarantine): {quar_inv.count()}")
 print("Negative stock rows:", clean_inv.filter("negative_stock = true").count())
@@ -69,7 +77,9 @@ print("Negative stock rows:", clean_inv.filter("negative_stock = true").count())
 
 # COMMAND ----------
 
-clean_pe, quar_pe = process_price_events(spark, BRONZE_PRICE_EVT, SILVER_PRICE_EVT, QUAR_PRICE_EVT)
+clean_pe, quar_pe = process_price_events(
+    spark, BRONZE_PRICE_EVT, SILVER_PRICE_EVT, QUAR_PRICE_EVT
+)
 print(f"Silver price events (clean):      {clean_pe.count()}")
 print(f"Silver price events (quarantine): {quar_pe.count()}")
 print("Quarantine breakdown:", quarantine_summary(quar_pe))

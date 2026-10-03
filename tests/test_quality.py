@@ -10,15 +10,21 @@ from pyspark.sql.types import LongType, StringType, StructField, StructType
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
-from marketplace_lakehouse.quality import assert_all_positive, assert_no_nulls, quarantine_summary
+from marketplace_lakehouse.quality import (
+    assert_all_positive,
+    assert_no_nulls,
+    quarantine_summary,
+)
 
 
 class TestQualityUtils:
 
     def test_quarantine_summary(self, spark):
-        schema = StructType([
-            StructField("_quarantine_reason", StringType(), True),
-        ])
+        schema = StructType(
+            [
+                StructField("_quarantine_reason", StringType(), True),
+            ]
+        )
         df = spark.createDataFrame(
             [("MISSING_ORDER_ID",), ("MISSING_ORDER_ID",), ("INVALID_TIMESTAMP",)],
             schema=schema,

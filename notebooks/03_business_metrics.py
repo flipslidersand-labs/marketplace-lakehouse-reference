@@ -26,13 +26,13 @@ from marketplace_lakehouse.gold import (
 
 BASE_PATH = "/FileStore/marketplace-lakehouse"
 
-SILVER_ORDERS    = f"{BASE_PATH}/silver/orders"
+SILVER_ORDERS = f"{BASE_PATH}/silver/orders"
 SILVER_INVENTORY = f"{BASE_PATH}/silver/inventory"
 SILVER_PRICE_EVT = f"{BASE_PATH}/silver/price_events"
 
-GOLD_REVENUE    = f"{BASE_PATH}/gold/daily_revenue"
-GOLD_INV_RISK   = f"{BASE_PATH}/gold/inventory_risk"
-GOLD_ANOMALIES  = f"{BASE_PATH}/gold/price_anomalies"
+GOLD_REVENUE = f"{BASE_PATH}/gold/daily_revenue"
+GOLD_INV_RISK = f"{BASE_PATH}/gold/inventory_risk"
+GOLD_ANOMALIES = f"{BASE_PATH}/gold/price_anomalies"
 
 # COMMAND ----------
 
@@ -58,7 +58,9 @@ print("Risk distribution:")
 display(risk.groupBy("risk_level").count())
 
 print("\nAt-risk SKUs:")
-display(risk.filter(F.col("risk_level").isin("CRITICAL", "HIGH")).orderBy("days_of_stock"))
+display(
+    risk.filter(F.col("risk_level").isin("CRITICAL", "HIGH")).orderBy("days_of_stock")
+)
 
 # COMMAND ----------
 

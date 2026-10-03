@@ -16,7 +16,11 @@ import sys
 
 sys.path.insert(0, "/Workspace/Repos/marketplace-lakehouse-reference/src")
 
-from marketplace_lakehouse.bronze import ingest_inventory, ingest_orders, ingest_price_events
+from marketplace_lakehouse.bronze import (
+    ingest_inventory,
+    ingest_orders,
+    ingest_price_events,
+)
 
 # COMMAND ----------
 
@@ -27,7 +31,7 @@ from marketplace_lakehouse.bronze import ingest_inventory, ingest_orders, ingest
 BASE_PATH = "/FileStore/marketplace-lakehouse"
 DATA_PATH = f"{BASE_PATH}/data/samples"
 
-BRONZE_ORDERS    = f"{BASE_PATH}/bronze/orders"
+BRONZE_ORDERS = f"{BASE_PATH}/bronze/orders"
 BRONZE_INVENTORY = f"{BASE_PATH}/bronze/inventory"
 BRONZE_PRICE_EVT = f"{BASE_PATH}/bronze/price_events"
 
@@ -57,7 +61,9 @@ display(orders_bronze.limit(5))
 
 # COMMAND ----------
 
-inventory_bronze = ingest_inventory(spark, f"{DATA_PATH}/inventory.csv", BRONZE_INVENTORY)
+inventory_bronze = ingest_inventory(
+    spark, f"{DATA_PATH}/inventory.csv", BRONZE_INVENTORY
+)
 print(f"Bronze inventory: {inventory_bronze.count()} rows")
 display(inventory_bronze.limit(5))
 
@@ -67,7 +73,9 @@ display(inventory_bronze.limit(5))
 
 # COMMAND ----------
 
-price_bronze = ingest_price_events(spark, f"{DATA_PATH}/price_events.jsonl", BRONZE_PRICE_EVT)
+price_bronze = ingest_price_events(
+    spark, f"{DATA_PATH}/price_events.jsonl", BRONZE_PRICE_EVT
+)
 print(f"Bronze price events: {price_bronze.count()} rows")
 display(price_bronze.limit(5))
 
@@ -77,4 +85,8 @@ display(price_bronze.limit(5))
 
 # COMMAND ----------
 
-display(orders_bronze.select("order_id", "ordered_at", "_ingested_at", "_source_file").limit(3))
+display(
+    orders_bronze.select(
+        "order_id", "ordered_at", "_ingested_at", "_source_file"
+    ).limit(3)
+)
