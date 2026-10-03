@@ -16,9 +16,11 @@ from marketplace_lakehouse.quality import assert_all_positive, assert_no_nulls, 
 class TestQualityUtils:
 
     def test_quarantine_summary(self, spark):
-        schema = StructType([
-            StructField("_quarantine_reason", StringType(), True),
-        ])
+        schema = StructType(
+            [
+                StructField("_quarantine_reason", StringType(), True),
+            ]
+        )
         df = spark.createDataFrame(
             [("MISSING_ORDER_ID",), ("MISSING_ORDER_ID",), ("INVALID_TIMESTAMP",)],
             schema=schema,

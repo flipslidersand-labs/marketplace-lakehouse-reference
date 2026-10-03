@@ -28,6 +28,7 @@ from marketplace_lakehouse.silver import (
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def make_order(spark: SparkSession, **overrides) -> object:
     defaults = {
         "order_id": "ORD-99999",
@@ -41,23 +42,26 @@ def make_order(spark: SparkSession, **overrides) -> object:
         "extra_field": None,
     }
     defaults.update(overrides)
-    schema = StructType([
-        StructField("order_id", StringType(), True),
-        StructField("product_id", StringType(), True),
-        StructField("channel", StringType(), True),
-        StructField("quantity", StringType(), True),
-        StructField("unit_price", StringType(), True),
-        StructField("ordered_at", StringType(), True),
-        StructField("_ingested_at", StringType(), True),
-        StructField("_source_file", StringType(), True),
-        StructField("extra_field", StringType(), True),
-    ])
+    schema = StructType(
+        [
+            StructField("order_id", StringType(), True),
+            StructField("product_id", StringType(), True),
+            StructField("channel", StringType(), True),
+            StructField("quantity", StringType(), True),
+            StructField("unit_price", StringType(), True),
+            StructField("ordered_at", StringType(), True),
+            StructField("_ingested_at", StringType(), True),
+            StructField("_source_file", StringType(), True),
+            StructField("extra_field", StringType(), True),
+        ]
+    )
     return spark.createDataFrame([defaults], schema=schema)
 
 
 # ---------------------------------------------------------------------------
 # Orders — quarantine tests
 # ---------------------------------------------------------------------------
+
 
 class TestOrdersQuarantine:
 
@@ -73,33 +77,25 @@ class TestOrdersQuarantine:
         df = make_order(spark, product_id=None)
         clean, quarantine = validate_orders(df)
         assert clean.count() == 0
-        assert quarantine.filter(
-            F.col("_quarantine_reason") == "MISSING_PRODUCT_ID"
-        ).count() == 1
+        assert quarantine.filter(F.col("_quarantine_reason") == "MISSING_PRODUCT_ID").count() == 1
 
     def test_zero_quantity_is_quarantined(self, spark):
         df = make_order(spark, quantity="0")
         clean, quarantine = validate_orders(df)
         assert clean.count() == 0
-        assert quarantine.filter(
-            F.col("_quarantine_reason") == "INVALID_QUANTITY"
-        ).count() == 1
+        assert quarantine.filter(F.col("_quarantine_reason") == "INVALID_QUANTITY").count() == 1
 
     def test_negative_quantity_is_quarantined(self, spark):
         df = make_order(spark, quantity="-3")
         clean, quarantine = validate_orders(df)
         assert clean.count() == 0
-        assert quarantine.filter(
-            F.col("_quarantine_reason") == "INVALID_QUANTITY"
-        ).count() == 1
+        assert quarantine.filter(F.col("_quarantine_reason") == "INVALID_QUANTITY").count() == 1
 
     def test_invalid_timestamp_is_quarantined(self, spark):
         df = make_order(spark, ordered_at="NOT-A-DATE")
         clean, quarantine = validate_orders(df)
         assert clean.count() == 0
-        assert quarantine.filter(
-            F.col("_quarantine_reason") == "INVALID_TIMESTAMP"
-        ).count() == 1
+        assert quarantine.filter(F.col("_quarantine_reason") == "INVALID_TIMESTAMP").count() == 1
 
     def test_valid_order_passes_through(self, spark):
         df = make_order(spark)
@@ -108,17 +104,19 @@ class TestOrdersQuarantine:
         assert quarantine.count() == 0
 
     def test_duplicate_order_ids_deduplicated(self, spark):
-        schema = StructType([
-            StructField("order_id", StringType(), True),
-            StructField("product_id", StringType(), True),
-            StructField("channel", StringType(), True),
-            StructField("quantity", StringType(), True),
-            StructField("unit_price", StringType(), True),
-            StructField("ordered_at", StringType(), True),
-            StructField("_ingested_at", StringType(), True),
-            StructField("_source_file", StringType(), True),
-            StructField("extra_field", StringType(), True),
-        ])
+        schema = StructType(
+            [
+                StructField("order_id", StringType(), True),
+                StructField("product_id", StringType(), True),
+                StructField("channel", StringType(), True),
+                StructField("quantity", StringType(), True),
+                StructField("unit_price", StringType(), True),
+                StructField("ordered_at", StringType(), True),
+                StructField("_ingested_at", StringType(), True),
+                StructField("_source_file", StringType(), True),
+                StructField("extra_field", StringType(), True),
+            ]
+        )
         rows = [
             ("ORD-001", "SKU-001", "web", "1", "1000", "2026-07-12T01:00:00Z", "t", "f", None),
             ("ORD-001", "SKU-001", "web", "2", "1000", "2026-07-12T02:00:00Z", "t", "f", None),
@@ -132,14 +130,13 @@ class TestOrdersQuarantine:
         # Later record has quantity=2; time string comparison is timezone-dependent
         assert dup_order["quantity"] == 2
         # The earlier duplicate is quarantined
-        assert quarantine.filter(
-            F.col("_quarantine_reason") == "DUPLICATE_ORDER"
-        ).count() == 1
+        assert quarantine.filter(F.col("_quarantine_reason") == "DUPLICATE_ORDER").count() == 1
 
 
 # ---------------------------------------------------------------------------
 # Inventory
 # ---------------------------------------------------------------------------
+
 
 class TestInventoryValidation:
 
@@ -153,26 +150,20 @@ class TestInventoryValidation:
             "_source_file": "test",
         }
         defaults.update(overrides)
-        schema = StructType([
-            StructField(k, StringType(), True) for k in defaults
-        ])
+        schema = StructType([StructField(k, StringType(), True) for k in defaults])
         return spark.createDataFrame([defaults], schema=schema)
 
     def test_null_product_id_quarantined(self, spark):
         df = self._make_inv(spark, product_id=None)
         clean, quarantine = validate_inventory(df)
         assert clean.count() == 0
-        assert quarantine.filter(
-            F.col("_quarantine_reason") == "MISSING_PRODUCT_ID"
-        ).count() == 1
+        assert quarantine.filter(F.col("_quarantine_reason") == "MISSING_PRODUCT_ID").count() == 1
 
     def test_invalid_timestamp_quarantined(self, spark):
         df = self._make_inv(spark, updated_at="BAD")
         clean, quarantine = validate_inventory(df)
         assert clean.count() == 0
-        assert quarantine.filter(
-            F.col("_quarantine_reason") == "INVALID_TIMESTAMP"
-        ).count() == 1
+        assert quarantine.filter(F.col("_quarantine_reason") == "INVALID_TIMESTAMP").count() == 1
 
     def test_negative_stock_flagged_not_quarantined(self, spark):
         df = self._make_inv(spark, quantity="-5")
@@ -185,6 +176,7 @@ class TestInventoryValidation:
 # ---------------------------------------------------------------------------
 # Price Events
 # ---------------------------------------------------------------------------
+
 
 class TestPriceEventsValidation:
 
@@ -205,23 +197,17 @@ class TestPriceEventsValidation:
     def test_null_product_id_quarantined(self, spark):
         df = self._make_pe(spark, product_id=None)
         clean, quarantine = validate_price_events(df)
-        assert quarantine.filter(
-            F.col("_quarantine_reason") == "MISSING_PRODUCT_ID"
-        ).count() == 1
+        assert quarantine.filter(F.col("_quarantine_reason") == "MISSING_PRODUCT_ID").count() == 1
 
     def test_zero_old_price_quarantined(self, spark):
         df = self._make_pe(spark, old_price="0")
         clean, quarantine = validate_price_events(df)
-        assert quarantine.filter(
-            F.col("_quarantine_reason") == "INVALID_OLD_PRICE"
-        ).count() == 1
+        assert quarantine.filter(F.col("_quarantine_reason") == "INVALID_OLD_PRICE").count() == 1
 
     def test_invalid_timestamp_quarantined(self, spark):
         df = self._make_pe(spark, changed_at="INVALID")
         clean, quarantine = validate_price_events(df)
-        assert quarantine.filter(
-            F.col("_quarantine_reason") == "INVALID_TIMESTAMP"
-        ).count() == 1
+        assert quarantine.filter(F.col("_quarantine_reason") == "INVALID_TIMESTAMP").count() == 1
 
     def test_valid_event_passes(self, spark):
         df = self._make_pe(spark)
