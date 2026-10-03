@@ -87,7 +87,9 @@ def optimize_table(
         spark.sql(f"OPTIMIZE {target}")
 
 
-def vacuum_table(spark: SparkSession, path: str, retention_hours: float = 168.0) -> None:
+def vacuum_table(
+    spark: SparkSession, path: str, retention_hours: float = 168.0
+) -> None:
     """Physically delete files tombstoned longer than ``retention_hours``.
 
     Defaults to 168h (7 days) — the same floor Delta enforces to avoid

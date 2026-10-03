@@ -11,11 +11,13 @@ from pyspark.sql import SparkSession
 @pytest.fixture(scope="session")
 def spark():
     builder = (
-        SparkSession.builder
-        .appName("marketplace-lakehouse-tests")
+        SparkSession.builder.appName("marketplace-lakehouse-tests")
         .master("local[*]")
         .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension")
-        .config("spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog")
+        .config(
+            "spark.sql.catalog.spark_catalog",
+            "org.apache.spark.sql.delta.catalog.DeltaCatalog",
+        )
         .config("spark.sql.shuffle.partitions", "4")
         .config("spark.driver.memory", "2g")
     )

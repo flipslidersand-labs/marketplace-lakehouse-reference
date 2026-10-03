@@ -31,36 +31,42 @@ from marketplace_lakehouse.gold import (
 # Helpers
 # ---------------------------------------------------------------------------
 
-ORDERS_SCHEMA = StructType([
-    StructField("order_id", StringType(), True),
-    StructField("product_id", StringType(), True),
-    StructField("channel", StringType(), True),
-    StructField("quantity", LongType(), True),
-    StructField("unit_price", DoubleType(), True),
-    StructField("ordered_at", TimestampType(), True),
-    StructField("_ingested_at", StringType(), True),
-    StructField("_source_file", StringType(), True),
-])
+ORDERS_SCHEMA = StructType(
+    [
+        StructField("order_id", StringType(), True),
+        StructField("product_id", StringType(), True),
+        StructField("channel", StringType(), True),
+        StructField("quantity", LongType(), True),
+        StructField("unit_price", DoubleType(), True),
+        StructField("ordered_at", TimestampType(), True),
+        StructField("_ingested_at", StringType(), True),
+        StructField("_source_file", StringType(), True),
+    ]
+)
 
-INVENTORY_SCHEMA = StructType([
-    StructField("product_id", StringType(), True),
-    StructField("warehouse", StringType(), True),
-    StructField("quantity", LongType(), True),
-    StructField("updated_at", TimestampType(), True),
-    StructField("negative_stock", StringType(), True),
-    StructField("_ingested_at", StringType(), True),
-    StructField("_source_file", StringType(), True),
-])
+INVENTORY_SCHEMA = StructType(
+    [
+        StructField("product_id", StringType(), True),
+        StructField("warehouse", StringType(), True),
+        StructField("quantity", LongType(), True),
+        StructField("updated_at", TimestampType(), True),
+        StructField("negative_stock", StringType(), True),
+        StructField("_ingested_at", StringType(), True),
+        StructField("_source_file", StringType(), True),
+    ]
+)
 
-PRICE_SCHEMA = StructType([
-    StructField("product_id", StringType(), True),
-    StructField("old_price", DoubleType(), True),
-    StructField("new_price", DoubleType(), True),
-    StructField("changed_at", TimestampType(), True),
-    StructField("source", StringType(), True),
-    StructField("_ingested_at", StringType(), True),
-    StructField("_source_file", StringType(), True),
-])
+PRICE_SCHEMA = StructType(
+    [
+        StructField("product_id", StringType(), True),
+        StructField("old_price", DoubleType(), True),
+        StructField("new_price", DoubleType(), True),
+        StructField("changed_at", TimestampType(), True),
+        StructField("source", StringType(), True),
+        StructField("_ingested_at", StringType(), True),
+        StructField("_source_file", StringType(), True),
+    ]
+)
 
 
 def make_orders(spark, rows):
@@ -77,12 +83,14 @@ def make_price_events(spark, rows):
 
 def _ts(s):
     from datetime import datetime
+
     return datetime.fromisoformat(s.replace("Z", "+00:00"))
 
 
 # ---------------------------------------------------------------------------
 # Daily Revenue
 # ---------------------------------------------------------------------------
+
 
 class TestDailyRevenue:
 
@@ -96,8 +104,26 @@ class TestDailyRevenue:
 
     def test_revenue_calculation(self, spark, tmp_path):
         rows = [
-            ("ORD-001", "SKU-001", "web", 2, 1200.0, _ts("2026-07-12T01:00:00Z"), "t", "f"),
-            ("ORD-002", "SKU-002", "web", 3, 800.0, _ts("2026-07-12T02:00:00Z"), "t", "f"),
+            (
+                "ORD-001",
+                "SKU-001",
+                "web",
+                2,
+                1200.0,
+                _ts("2026-07-12T01:00:00Z"),
+                "t",
+                "f",
+            ),
+            (
+                "ORD-002",
+                "SKU-002",
+                "web",
+                3,
+                800.0,
+                _ts("2026-07-12T02:00:00Z"),
+                "t",
+                "f",
+            ),
         ]
         revenue = self._run(spark, rows, tmp_path)
         total = revenue.agg(F.sum("gross_revenue")).first()[0]
@@ -106,7 +132,16 @@ class TestDailyRevenue:
     def test_duplicate_orders_do_not_inflate_revenue(self, spark, tmp_path):
         # Silver already deduped; if only one record is in Silver, revenue is correct
         rows = [
-            ("ORD-001", "SKU-001", "web", 2, 1200.0, _ts("2026-07-12T01:00:00Z"), "t", "f"),
+            (
+                "ORD-001",
+                "SKU-001",
+                "web",
+                2,
+                1200.0,
+                _ts("2026-07-12T01:00:00Z"),
+                "t",
+                "f",
+            ),
         ]
         revenue = self._run(spark, rows, tmp_path)
         total = revenue.agg(F.sum("gross_revenue")).first()[0]
@@ -114,8 +149,26 @@ class TestDailyRevenue:
 
     def test_revenue_grouped_by_channel(self, spark, tmp_path):
         rows = [
-            ("ORD-001", "SKU-001", "web", 1, 1000.0, _ts("2026-07-12T01:00:00Z"), "t", "f"),
-            ("ORD-002", "SKU-002", "mobile", 1, 2000.0, _ts("2026-07-12T01:00:00Z"), "t", "f"),
+            (
+                "ORD-001",
+                "SKU-001",
+                "web",
+                1,
+                1000.0,
+                _ts("2026-07-12T01:00:00Z"),
+                "t",
+                "f",
+            ),
+            (
+                "ORD-002",
+                "SKU-002",
+                "mobile",
+                1,
+                2000.0,
+                _ts("2026-07-12T01:00:00Z"),
+                "t",
+                "f",
+            ),
         ]
         revenue = self._run(spark, rows, tmp_path)
         channels = {r["channel"] for r in revenue.collect()}
@@ -126,6 +179,7 @@ class TestDailyRevenue:
 # ---------------------------------------------------------------------------
 # Inventory Risk
 # ---------------------------------------------------------------------------
+
 
 class TestInventoryRisk:
 
@@ -143,7 +197,16 @@ class TestInventoryRisk:
     def test_days_of_stock_calculation(self, spark, tmp_path):
         # 10 units sold over 1 day → avg_daily_sales=10; stock=50 → days=5
         order_rows = [
-            ("ORD-001", "SKU-001", "web", 10, 1000.0, _ts("2026-07-12T00:00:00Z"), "t", "f"),
+            (
+                "ORD-001",
+                "SKU-001",
+                "web",
+                10,
+                1000.0,
+                _ts("2026-07-12T00:00:00Z"),
+                "t",
+                "f",
+            ),
         ]
         inv_rows = [
             ("SKU-001", "tokyo", 50, _ts("2026-07-12T00:00:00Z"), None, "t", "f"),
@@ -166,7 +229,16 @@ class TestInventoryRisk:
     def test_critical_risk_classification(self, spark, tmp_path):
         # stock=20, avg_daily_sales=10 → days=2 → CRITICAL
         order_rows = [
-            ("ORD-001", "SKU-001", "web", 10, 1000.0, _ts("2026-07-12T00:00:00Z"), "t", "f"),
+            (
+                "ORD-001",
+                "SKU-001",
+                "web",
+                10,
+                1000.0,
+                _ts("2026-07-12T00:00:00Z"),
+                "t",
+                "f",
+            ),
         ]
         inv_rows = [
             ("SKU-001", "tokyo", 20, _ts("2026-07-12T00:00:00Z"), None, "t", "f"),
@@ -178,7 +250,16 @@ class TestInventoryRisk:
     def test_high_risk_classification(self, spark, tmp_path):
         # stock=50, avg_daily_sales=10 → days=5 → HIGH
         order_rows = [
-            ("ORD-001", "SKU-001", "web", 10, 1000.0, _ts("2026-07-12T00:00:00Z"), "t", "f"),
+            (
+                "ORD-001",
+                "SKU-001",
+                "web",
+                10,
+                1000.0,
+                _ts("2026-07-12T00:00:00Z"),
+                "t",
+                "f",
+            ),
         ]
         inv_rows = [
             ("SKU-001", "tokyo", 50, _ts("2026-07-12T00:00:00Z"), None, "t", "f"),
@@ -190,7 +271,16 @@ class TestInventoryRisk:
     def test_normal_risk_classification(self, spark, tmp_path):
         # stock=700, avg_daily_sales=10 → days=70 → NORMAL
         order_rows = [
-            ("ORD-001", "SKU-001", "web", 10, 1000.0, _ts("2026-07-12T00:00:00Z"), "t", "f"),
+            (
+                "ORD-001",
+                "SKU-001",
+                "web",
+                10,
+                1000.0,
+                _ts("2026-07-12T00:00:00Z"),
+                "t",
+                "f",
+            ),
         ]
         inv_rows = [
             ("SKU-001", "tokyo", 700, _ts("2026-07-12T00:00:00Z"), None, "t", "f"),
@@ -203,6 +293,7 @@ class TestInventoryRisk:
 # ---------------------------------------------------------------------------
 # Price Anomalies
 # ---------------------------------------------------------------------------
+
 
 class TestPriceAnomalies:
 
@@ -217,7 +308,15 @@ class TestPriceAnomalies:
     def test_positive_spike_flagged(self, spark, tmp_path):
         # +50% change → should be flagged
         rows = [
-            ("SKU-001", 1000.0, 1500.0, _ts("2026-07-12T01:00:00Z"), "pricing-service", "t", "f"),
+            (
+                "SKU-001",
+                1000.0,
+                1500.0,
+                _ts("2026-07-12T01:00:00Z"),
+                "pricing-service",
+                "t",
+                "f",
+            ),
         ]
         anomalies = self._run(spark, rows, tmp_path)
         assert anomalies.count() == 1
@@ -227,7 +326,15 @@ class TestPriceAnomalies:
     def test_negative_drop_flagged(self, spark, tmp_path):
         # -40% change → should be flagged
         rows = [
-            ("SKU-001", 1000.0, 600.0, _ts("2026-07-12T01:00:00Z"), "pricing-service", "t", "f"),
+            (
+                "SKU-001",
+                1000.0,
+                600.0,
+                _ts("2026-07-12T01:00:00Z"),
+                "pricing-service",
+                "t",
+                "f",
+            ),
         ]
         anomalies = self._run(spark, rows, tmp_path)
         assert anomalies.count() == 1
@@ -237,7 +344,15 @@ class TestPriceAnomalies:
     def test_small_change_not_flagged(self, spark, tmp_path):
         # +10% change → below threshold, should not be flagged
         rows = [
-            ("SKU-001", 1000.0, 1100.0, _ts("2026-07-12T01:00:00Z"), "pricing-service", "t", "f"),
+            (
+                "SKU-001",
+                1000.0,
+                1100.0,
+                _ts("2026-07-12T01:00:00Z"),
+                "pricing-service",
+                "t",
+                "f",
+            ),
         ]
         anomalies = self._run(spark, rows, tmp_path)
         assert anomalies.count() == 0
@@ -245,7 +360,15 @@ class TestPriceAnomalies:
     def test_exactly_threshold_is_flagged(self, spark, tmp_path):
         # exactly +30% → flagged (>= threshold)
         rows = [
-            ("SKU-001", 1000.0, 1300.0, _ts("2026-07-12T01:00:00Z"), "pricing-service", "t", "f"),
+            (
+                "SKU-001",
+                1000.0,
+                1300.0,
+                _ts("2026-07-12T01:00:00Z"),
+                "pricing-service",
+                "t",
+                "f",
+            ),
         ]
         anomalies = self._run(spark, rows, tmp_path)
         assert anomalies.count() == 1

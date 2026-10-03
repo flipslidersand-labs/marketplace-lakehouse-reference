@@ -111,13 +111,19 @@ st.divider()
 # ---------------------------------------------------------------------------
 
 st.subheader("Inventory Risk")
-st.caption("Products with fewer than 7 days of stock. Days of stock = current quantity ÷ avg daily sales.")
+st.caption(
+    "Products with fewer than 7 days of stock. Days of stock = current quantity ÷ avg daily sales."
+)
 
 if not risk_df.empty:
     risk_display = risk_df.copy()
 
     def _risk_badge(level: str) -> str:
-        return {"CRITICAL": "🔴 CRITICAL", "HIGH": "🟠 HIGH", "NORMAL": "🟢 NORMAL"}.get(level, level)
+        return {
+            "CRITICAL": "🔴 CRITICAL",
+            "HIGH": "🟠 HIGH",
+            "NORMAL": "🟢 NORMAL",
+        }.get(level, level)
 
     if "risk_level" in risk_display.columns:
         risk_display["risk_level"] = risk_display["risk_level"].apply(_risk_badge)
@@ -160,13 +166,15 @@ if not anomaly_df.empty:
     anomaly_display = anomaly_df.copy()
 
     if "price_change_ratio" in anomaly_display.columns:
-        anomaly_display["price_change_pct"] = anomaly_display["price_change_ratio"].apply(
-            lambda x: f"{x*100:+.1f}%" if pd.notna(x) else "—"
-        )
+        anomaly_display["price_change_pct"] = anomaly_display[
+            "price_change_ratio"
+        ].apply(lambda x: f"{x*100:+.1f}%" if pd.notna(x) else "—")
         anomaly_display = anomaly_display.drop(columns=["price_change_ratio"])
 
     if "changed_at" in anomaly_display.columns:
-        anomaly_display["changed_at"] = pd.to_datetime(anomaly_display["changed_at"]).dt.strftime("%Y-%m-%d %H:%M")
+        anomaly_display["changed_at"] = pd.to_datetime(
+            anomaly_display["changed_at"]
+        ).dt.strftime("%Y-%m-%d %H:%M")
 
     st.dataframe(
         anomaly_display,
@@ -192,7 +200,11 @@ st.divider()
 
 st.subheader("Daily Revenue by Channel")
 
-if not revenue_df.empty and "date" in revenue_df.columns and "gross_revenue" in revenue_df.columns:
+if (
+    not revenue_df.empty
+    and "date" in revenue_df.columns
+    and "gross_revenue" in revenue_df.columns
+):
     pivot = revenue_df.pivot_table(
         index="date", columns="channel", values="gross_revenue", aggfunc="sum"
     ).fillna(0)
