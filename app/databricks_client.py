@@ -102,7 +102,9 @@ def fetch_kpi_summary() -> dict:
 
     at_risk_skus = 0
     if not risk_df.empty and "risk_level" in risk_df.columns:
-        at_risk_skus = int(risk_df[risk_df["risk_level"].isin(["CRITICAL", "HIGH"])].shape[0])
+        at_risk_skus = int(
+            risk_df[risk_df["risk_level"].isin(["CRITICAL", "HIGH"])].shape[0]
+        )
 
     anomaly_count = len(anomaly_df) if not anomaly_df.empty else 0
 

@@ -196,7 +196,9 @@ def main() -> None:
 
     print(f"Generated {len(orders)} orders -> data/samples/orders.jsonl")
     print(f"Generated {len(inventory)} inventory rows -> data/samples/inventory.csv")
-    print(f"Generated {len(price_events)} price events -> data/samples/price_events.jsonl")
+    print(
+        f"Generated {len(price_events)} price events -> data/samples/price_events.jsonl"
+    )
 
 
 if __name__ == "__main__":

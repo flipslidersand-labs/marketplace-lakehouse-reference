@@ -75,7 +75,10 @@ class TestMergeUpsert:
             path,
             ["order_id"],
         )
-        rows = {r["order_id"]: r["quantity"] for r in spark.read.format("delta").load(path).collect()}
+        rows = {
+            r["order_id"]: r["quantity"]
+            for r in spark.read.format("delta").load(path).collect()
+        }
         assert rows == {"o1": 9, "o2": 1, "o3": 4}
 
     def test_missing_key_column_raises(self, spark, tmp_path):
@@ -98,11 +101,19 @@ class TestTimeTravel:
         path = str(tmp_path / "orders")
         merge_upsert(spark, _orders(spark, [("o1", "p1", 2, 10.0)]), path, ["order_id"])
         v0 = latest_version(spark, path)
-        merge_upsert(spark, _orders(spark, [("o1", "p1", 99, 10.0)]), path, ["order_id"])
+        merge_upsert(
+            spark, _orders(spark, [("o1", "p1", 99, 10.0)]), path, ["order_id"]
+        )
 
         # Current reflects the update; the pinned version still sees the original.
-        current = {r["order_id"]: r["quantity"] for r in read_version(spark, path, latest_version(spark, path)).collect()}
-        original = {r["order_id"]: r["quantity"] for r in read_version(spark, path, v0).collect()}
+        current = {
+            r["order_id"]: r["quantity"]
+            for r in read_version(spark, path, latest_version(spark, path)).collect()
+        }
+        original = {
+            r["order_id"]: r["quantity"]
+            for r in read_version(spark, path, v0).collect()
+        }
         assert current["o1"] == 99
         assert original["o1"] == 2
 
@@ -133,7 +144,9 @@ class TestMaintenance:
         path = str(tmp_path / "orders")
         # Several commits produce several small files worth compacting.
         for i in range(3):
-            merge_upsert(spark, _orders(spark, [(f"o{i}", "p", 1, 1.0)]), path, ["order_id"])
+            merge_upsert(
+                spark, _orders(spark, [(f"o{i}", "p", 1, 1.0)]), path, ["order_id"]
+            )
         optimize_table(spark, path)
         assert spark.read.format("delta").load(path).count() == 3
 
