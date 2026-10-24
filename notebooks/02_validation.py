@@ -26,16 +26,16 @@ from marketplace_lakehouse.silver import process_inventory, process_orders, proc
 
 BASE_PATH = "/FileStore/marketplace-lakehouse"
 
-BRONZE_ORDERS    = f"{BASE_PATH}/bronze/orders"
+BRONZE_ORDERS = f"{BASE_PATH}/bronze/orders"
 BRONZE_INVENTORY = f"{BASE_PATH}/bronze/inventory"
 BRONZE_PRICE_EVT = f"{BASE_PATH}/bronze/price_events"
 
-SILVER_ORDERS    = f"{BASE_PATH}/silver/orders"
+SILVER_ORDERS = f"{BASE_PATH}/silver/orders"
 SILVER_INVENTORY = f"{BASE_PATH}/silver/inventory"
 SILVER_PRICE_EVT = f"{BASE_PATH}/silver/price_events"
-QUAR_ORDERS      = f"{BASE_PATH}/silver/quarantined_orders"
-QUAR_INVENTORY   = f"{BASE_PATH}/silver/quarantined_inventory"
-QUAR_PRICE_EVT   = f"{BASE_PATH}/silver/quarantined_price_events"
+QUAR_ORDERS = f"{BASE_PATH}/silver/quarantined_orders"
+QUAR_INVENTORY = f"{BASE_PATH}/silver/quarantined_inventory"
+QUAR_PRICE_EVT = f"{BASE_PATH}/silver/quarantined_price_events"
 
 # COMMAND ----------
 

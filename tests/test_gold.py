@@ -31,36 +31,42 @@ from marketplace_lakehouse.gold import (
 # Helpers
 # ---------------------------------------------------------------------------
 
-ORDERS_SCHEMA = StructType([
-    StructField("order_id", StringType(), True),
-    StructField("product_id", StringType(), True),
-    StructField("channel", StringType(), True),
-    StructField("quantity", LongType(), True),
-    StructField("unit_price", DoubleType(), True),
-    StructField("ordered_at", TimestampType(), True),
-    StructField("_ingested_at", StringType(), True),
-    StructField("_source_file", StringType(), True),
-])
+ORDERS_SCHEMA = StructType(
+    [
+        StructField("order_id", StringType(), True),
+        StructField("product_id", StringType(), True),
+        StructField("channel", StringType(), True),
+        StructField("quantity", LongType(), True),
+        StructField("unit_price", DoubleType(), True),
+        StructField("ordered_at", TimestampType(), True),
+        StructField("_ingested_at", StringType(), True),
+        StructField("_source_file", StringType(), True),
+    ]
+)
 
-INVENTORY_SCHEMA = StructType([
-    StructField("product_id", StringType(), True),
-    StructField("warehouse", StringType(), True),
-    StructField("quantity", LongType(), True),
-    StructField("updated_at", TimestampType(), True),
-    StructField("negative_stock", StringType(), True),
-    StructField("_ingested_at", StringType(), True),
-    StructField("_source_file", StringType(), True),
-])
+INVENTORY_SCHEMA = StructType(
+    [
+        StructField("product_id", StringType(), True),
+        StructField("warehouse", StringType(), True),
+        StructField("quantity", LongType(), True),
+        StructField("updated_at", TimestampType(), True),
+        StructField("negative_stock", StringType(), True),
+        StructField("_ingested_at", StringType(), True),
+        StructField("_source_file", StringType(), True),
+    ]
+)
 
-PRICE_SCHEMA = StructType([
-    StructField("product_id", StringType(), True),
-    StructField("old_price", DoubleType(), True),
-    StructField("new_price", DoubleType(), True),
-    StructField("changed_at", TimestampType(), True),
-    StructField("source", StringType(), True),
-    StructField("_ingested_at", StringType(), True),
-    StructField("_source_file", StringType(), True),
-])
+PRICE_SCHEMA = StructType(
+    [
+        StructField("product_id", StringType(), True),
+        StructField("old_price", DoubleType(), True),
+        StructField("new_price", DoubleType(), True),
+        StructField("changed_at", TimestampType(), True),
+        StructField("source", StringType(), True),
+        StructField("_ingested_at", StringType(), True),
+        StructField("_source_file", StringType(), True),
+    ]
+)
 
 
 def make_orders(spark, rows):
@@ -77,12 +83,14 @@ def make_price_events(spark, rows):
 
 def _ts(s):
     from datetime import datetime
+
     return datetime.fromisoformat(s.replace("Z", "+00:00"))
 
 
 # ---------------------------------------------------------------------------
 # Daily Revenue
 # ---------------------------------------------------------------------------
+
 
 class TestDailyRevenue:
 
@@ -126,6 +134,7 @@ class TestDailyRevenue:
 # ---------------------------------------------------------------------------
 # Inventory Risk
 # ---------------------------------------------------------------------------
+
 
 class TestInventoryRisk:
 
@@ -203,6 +212,7 @@ class TestInventoryRisk:
 # ---------------------------------------------------------------------------
 # Price Anomalies
 # ---------------------------------------------------------------------------
+
 
 class TestPriceAnomalies:
 
