@@ -27,7 +27,7 @@ from marketplace_lakehouse.bronze import ingest_inventory, ingest_orders, ingest
 BASE_PATH = "/FileStore/marketplace-lakehouse"
 DATA_PATH = f"{BASE_PATH}/data/samples"
 
-BRONZE_ORDERS    = f"{BASE_PATH}/bronze/orders"
+BRONZE_ORDERS = f"{BASE_PATH}/bronze/orders"
 BRONZE_INVENTORY = f"{BASE_PATH}/bronze/inventory"
 BRONZE_PRICE_EVT = f"{BASE_PATH}/bronze/price_events"
 

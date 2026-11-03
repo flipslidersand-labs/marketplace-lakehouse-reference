@@ -8,12 +8,7 @@ from pyspark.sql import functions as F
 
 def quarantine_summary(df: DataFrame) -> dict:
     """Return counts by quarantine reason for reporting."""
-    rows = (
-        df
-        .groupBy("_quarantine_reason")
-        .count()
-        .collect()
-    )
+    rows = df.groupBy("_quarantine_reason").count().collect()
     return {r["_quarantine_reason"]: r["count"] for r in rows}
 
 
