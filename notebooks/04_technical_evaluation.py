@@ -15,16 +15,19 @@ from pyspark.sql import functions as F
 
 BASE_PATH = "/FileStore/marketplace-lakehouse"
 
-def load(path): return spark.read.format("delta").load(path)
 
-bronze_orders    = load(f"{BASE_PATH}/bronze/orders")
-silver_orders    = load(f"{BASE_PATH}/silver/orders")
-quar_orders      = load(f"{BASE_PATH}/silver/quarantined_orders")
+def load(path):
+    return spark.read.format("delta").load(path)
+
+
+bronze_orders = load(f"{BASE_PATH}/bronze/orders")
+silver_orders = load(f"{BASE_PATH}/silver/orders")
+quar_orders = load(f"{BASE_PATH}/silver/quarantined_orders")
 silver_inventory = load(f"{BASE_PATH}/silver/inventory")
-silver_pe        = load(f"{BASE_PATH}/silver/price_events")
-gold_revenue     = load(f"{BASE_PATH}/gold/daily_revenue")
-gold_risk        = load(f"{BASE_PATH}/gold/inventory_risk")
-gold_anomalies   = load(f"{BASE_PATH}/gold/price_anomalies")
+silver_pe = load(f"{BASE_PATH}/silver/price_events")
+gold_revenue = load(f"{BASE_PATH}/gold/daily_revenue")
+gold_risk = load(f"{BASE_PATH}/gold/inventory_risk")
+gold_anomalies = load(f"{BASE_PATH}/gold/price_anomalies")
 
 # COMMAND ----------
 
@@ -51,7 +54,7 @@ display(bronze_orders.select("order_id", "_source_file", "_ingested_at").limit(3
 # COMMAND ----------
 
 null_ids = silver_orders.filter(F.col("order_id").isNull()).count()
-bad_qty  = silver_orders.filter(F.col("quantity") <= 0).count()
+bad_qty = silver_orders.filter(F.col("quantity") <= 0).count()
 print(f"Null order_ids in Silver:   {null_ids}  (expected: 0)")
 print(f"Invalid quantities in Silver: {bad_qty}  (expected: 0)")
 

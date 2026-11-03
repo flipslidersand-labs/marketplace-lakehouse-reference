@@ -45,3 +45,6 @@ ignore = ["E501"]
 "notebooks/*.py" = ["F821", "E402"]
 # 条件付き import による意図的な順序
 "app/main.py" = ["E402"]
+
+[tool.black]
+line-length = 100

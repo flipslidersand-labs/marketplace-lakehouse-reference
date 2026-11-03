@@ -17,7 +17,10 @@ from pyspark.sql import functions as F
 # Daily Revenue
 # ---------------------------------------------------------------------------
 
-def build_daily_revenue(spark: SparkSession, silver_orders_path: str, output_path: str) -> DataFrame:
+
+def build_daily_revenue(
+    spark: SparkSession, silver_orders_path: str, output_path: str
+) -> DataFrame:
     """
     Aggregate clean (deduplicated) orders by date and channel.
     Revenue = quantity * unit_price. Duplicate orders cannot inflate revenue
@@ -26,8 +29,7 @@ def build_daily_revenue(spark: SparkSession, silver_orders_path: str, output_pat
     orders = spark.read.format("delta").load(silver_orders_path)
 
     revenue = (
-        orders
-        .withColumn("date", F.to_date("ordered_at"))
+        orders.withColumn("date", F.to_date("ordered_at"))
         .groupBy("date", "channel")
         .agg(
             F.count("order_id").alias("order_count"),
@@ -44,6 +46,7 @@ def build_daily_revenue(spark: SparkSession, silver_orders_path: str, output_pat
 # ---------------------------------------------------------------------------
 # Inventory Risk
 # ---------------------------------------------------------------------------
+
 
 def build_inventory_risk(
     spark: SparkSession,
@@ -70,8 +73,7 @@ def build_inventory_risk(
 
     # Sales velocity per product
     sales_velocity = (
-        orders
-        .withColumn("date", F.to_date("ordered_at"))
+        orders.withColumn("date", F.to_date("ordered_at"))
         .groupBy("product_id")
         .agg(
             F.sum("quantity").alias("total_units_sold"),
@@ -79,36 +81,31 @@ def build_inventory_risk(
         )
         .withColumn(
             "avg_daily_sales",
-            F.when(F.col("active_days") > 0,
-                   F.col("total_units_sold") / F.col("active_days"))
-             .otherwise(F.lit(0.0))
+            F.when(
+                F.col("active_days") > 0, F.col("total_units_sold") / F.col("active_days")
+            ).otherwise(F.lit(0.0)),
         )
     )
 
     # Current stock per product (sum across warehouses)
-    current_stock = (
-        inventory
-        .groupBy("product_id")
-        .agg(F.sum("quantity").alias("current_quantity"))
-    )
+    current_stock = inventory.groupBy("product_id").agg(F.sum("quantity").alias("current_quantity"))
 
     # Join and calculate days of stock
     risk = (
-        current_stock
-        .join(sales_velocity, on="product_id", how="left")
+        current_stock.join(sales_velocity, on="product_id", how="left")
         .withColumn(
             "days_of_stock",
             F.when(
                 F.col("avg_daily_sales").isNotNull() & (F.col("avg_daily_sales") > 0),
-                F.col("current_quantity") / F.col("avg_daily_sales")
-            ).otherwise(F.lit(None).cast("double"))
+                F.col("current_quantity") / F.col("avg_daily_sales"),
+            ).otherwise(F.lit(None).cast("double")),
         )
         .withColumn(
             "risk_level",
             F.when(F.col("days_of_stock").isNull(), F.lit("NORMAL"))
-             .when(F.col("days_of_stock") < 3, F.lit("CRITICAL"))
-             .when(F.col("days_of_stock") < 7, F.lit("HIGH"))
-             .otherwise(F.lit("NORMAL"))
+            .when(F.col("days_of_stock") < 3, F.lit("CRITICAL"))
+            .when(F.col("days_of_stock") < 7, F.lit("HIGH"))
+            .otherwise(F.lit("NORMAL")),
         )
         .select(
             "product_id",
@@ -147,10 +144,8 @@ def build_price_anomalies(
     events = spark.read.format("delta").load(silver_price_events_path)
 
     anomalies = (
-        events
-        .withColumn(
-            "price_change_ratio",
-            (F.col("new_price") - F.col("old_price")) / F.col("old_price")
+        events.withColumn(
+            "price_change_ratio", (F.col("new_price") - F.col("old_price")) / F.col("old_price")
         )
         .filter(F.abs(F.col("price_change_ratio")) >= ANOMALY_THRESHOLD)
         .select(
