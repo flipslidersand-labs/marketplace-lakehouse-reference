@@ -158,7 +158,7 @@ marketplace-lakehouse-reference/
 │   └── workshop.md                 # 60-minute workshop guide
 │
 ├── data/
-│   └── samples/                    # Generated synthetic data (gitignored)
+│   └── samples/                    # Synthetic sample data (committed to git)
 │
 ├── src/
 │   ├── generator/
@@ -194,8 +194,8 @@ marketplace-lakehouse-reference/
 
 ### Prerequisites
 
-- Python 3.10+
-- Java 11+ (required by PySpark)
+- Python 3.10+ (`requires-python = ">=3.10"` in `pyproject.toml`). CI runs only Python 3.12; other versions are not tested.
+- Java (required by PySpark). CI runs only Java 17; this repo does not declare or test a minimum Java version.
 
 ### Quick Start (local, ~2 minutes)
 
@@ -204,13 +204,15 @@ git clone https://github.com/flipslidersand-labs/marketplace-lakehouse-reference
 cd marketplace-lakehouse-reference
 
 python3 -m venv .venv && source .venv/bin/activate
-pip install -e ".[dev]" pyarrow
+pip install -e ".[dev,app]" pyarrow
 
 python3 run_pipeline.py          # Bronze → Silver → Gold, exports parquet
 streamlit run app/main.py        # Dashboard at http://localhost:8501
 ```
 
-`run_pipeline.py` generates synthetic data on first run, then executes all three layers and prints a summary of clean vs. quarantined record counts per table.
+`run_pipeline.py` uses the committed `data/samples/` files. It generates synthetic data only if `data/samples/orders.jsonl` is missing (otherwise it skips generation). It then executes all three layers and prints a summary of clean vs. quarantined record counts per table.
+
+The `app` extra provides `streamlit` and `databricks-sql-connector`, which `streamlit run app/main.py` needs; the `dev` extra provides the test tools. CI installs only `.[dev]`, so the dashboard's dependencies are not exercised in CI.
 
 ### Databricks Workspace
 
@@ -283,7 +285,7 @@ The demo application is designed to run locally to eliminate infrastructure cost
 
 Checked statically against code and tests (not executed).
 
-- [ ] Quick Start installs everything `streamlit run app/main.py` needs (streamlit is in the `app` extra, not `dev`)
+- [x] Quick Start installs everything `streamlit run app/main.py` needs (streamlit is in the `app` extra, not `dev`)
 - [x] `run_pipeline.py` builds Bronze → Silver → Gold and exports Gold parquet for the offline dashboard
 - [x] Every behaviour under "Running the Tests" has a test, and CI runs the suite
 - [x] Success criteria are implemented: source metadata, quarantine reasons, inventory risk, 30% price anomalies
