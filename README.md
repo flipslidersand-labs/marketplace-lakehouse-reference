@@ -212,7 +212,7 @@ streamlit run app/main.py        # Dashboard at http://localhost:8501
 
 `run_pipeline.py` uses the committed `data/samples/` files. It generates synthetic data only if `data/samples/orders.jsonl` is missing (otherwise it skips generation). It then executes all three layers and prints a summary of clean vs. quarantined record counts per table.
 
-The `app` extra provides `streamlit` and `databricks-sql-connector`, which `streamlit run app/main.py` needs; the `dev` extra provides the test tools. CI installs only `.[dev]`, so the dashboard's dependencies are not exercised in CI.
+The `app` extra provides `streamlit` (needed by `streamlit run app/main.py`) and `databricks-sql-connector` (imported only when `DATABRICKS_HOST` is set); the `dev` extra provides the test tools. CI installs only `.[dev]`, so the dashboard's dependencies are not exercised in CI.
 
 ### Databricks Workspace
 
