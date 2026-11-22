@@ -5,6 +5,8 @@
 ![Python](https://img.shields.io/badge/python-3.12-blue)
 ![License](https://img.shields.io/badge/license-Apache%202.0-green)
 
+Release type: `reference`
+
 A working end-to-end Medallion Architecture pipeline (Bronze → Silver → Gold) built with PySpark and Delta Lake — translating a fragmented marketplace data problem into measurable business outcomes, runnable locally in under two minutes.
 
 ![Dashboard](docs/assets/dashboard.png)
