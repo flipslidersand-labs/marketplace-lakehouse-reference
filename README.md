@@ -279,6 +279,17 @@ The demo application is designed to run locally to eliminate infrastructure cost
 
 ---
 
+## v1 scope
+
+Checked statically against code and tests (not executed).
+
+- [ ] Quick Start installs everything `streamlit run app/main.py` needs (streamlit is in the `app` extra, not `dev`)
+- [x] `run_pipeline.py` builds Bronze → Silver → Gold and exports Gold parquet for the offline dashboard
+- [x] Every behaviour under "Running the Tests" has a test, and CI runs the suite
+- [x] Success criteria are implemented: source metadata, quarantine reasons, inventory risk, 30% price anomalies
+- [x] Delta operations exist, and a test shows replaying the same batch changes nothing
+- [ ] Gold is read through Databricks SQL and notebooks 01–04 run on a workspace (no test or CI covers this)
+
 ## Production Considerations
 
 The following are outside the scope of this prototype and would require explicit design decisions before production deployment:
