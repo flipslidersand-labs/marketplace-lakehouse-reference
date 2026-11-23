@@ -5,6 +5,8 @@
 ![Python](https://img.shields.io/badge/python-3.12-blue)
 ![License](https://img.shields.io/badge/license-Apache%202.0-green)
 
+Release type: `reference`
+
 A working end-to-end Medallion Architecture pipeline (Bronze → Silver → Gold) built with PySpark and Delta Lake — translating a fragmented marketplace data problem into measurable business outcomes, runnable locally in under two minutes.
 
 ![Dashboard](docs/assets/dashboard.png)
@@ -156,7 +158,7 @@ marketplace-lakehouse-reference/
 │   └── workshop.md                 # 60-minute workshop guide
 │
 ├── data/
-│   └── samples/                    # Generated synthetic data (gitignored)
+│   └── samples/                    # Synthetic sample data (committed to git)
 │
 ├── src/
 │   ├── generator/
@@ -192,8 +194,8 @@ marketplace-lakehouse-reference/
 
 ### Prerequisites
 
-- Python 3.10+
-- Java 11+ (required by PySpark)
+- Python 3.10+ (`requires-python = ">=3.10"` in `pyproject.toml`). CI runs only Python 3.12; other versions are not tested.
+- Java (required by PySpark). CI runs only Java 17; this repo does not declare or test a minimum Java version.
 
 ### Quick Start (local, ~2 minutes)
 
@@ -202,13 +204,15 @@ git clone https://github.com/flipslidersand-labs/marketplace-lakehouse-reference
 cd marketplace-lakehouse-reference
 
 python3 -m venv .venv && source .venv/bin/activate
-pip install -e ".[dev]" pyarrow
+pip install -e ".[dev,app]" pyarrow
 
 python3 run_pipeline.py          # Bronze → Silver → Gold, exports parquet
 streamlit run app/main.py        # Dashboard at http://localhost:8501
 ```
 
-`run_pipeline.py` generates synthetic data on first run, then executes all three layers and prints a summary of clean vs. quarantined record counts per table.
+`run_pipeline.py` uses the committed `data/samples/` files. It generates synthetic data only if `data/samples/orders.jsonl` is missing (otherwise it skips generation). It then executes all three layers and prints a summary of clean vs. quarantined record counts per table.
+
+The `app` extra provides `streamlit` (needed by `streamlit run app/main.py`) and `databricks-sql-connector` (imported only when `DATABRICKS_HOST` is set); the `dev` extra provides the test tools. CI installs only `.[dev]`, so the dashboard's dependencies are not exercised in CI.
 
 ### Databricks Workspace
 
@@ -276,6 +280,17 @@ Distributed operations are expressed as composable DataFrame transformations. Th
 The demo application is designed to run locally to eliminate infrastructure cost and complexity during the evaluation phase. A production deployment would use Databricks Apps or a container service.
 
 ---
+
+## v1 scope
+
+Checked statically against code and tests (not executed).
+
+- [x] Quick Start installs everything `streamlit run app/main.py` needs (streamlit is in the `app` extra, not `dev`)
+- [x] `run_pipeline.py` builds Bronze → Silver → Gold and exports Gold parquet for the offline dashboard
+- [x] Every behaviour under "Running the Tests" has a test, and CI runs the suite
+- [x] Success criteria are implemented: source metadata, quarantine reasons, inventory risk, 30% price anomalies
+- [x] Delta operations exist, and a test shows replaying the same batch changes nothing
+- [ ] Gold is read through Databricks SQL and notebooks 01–04 run on a workspace (no test or CI covers this)
 
 ## Production Considerations
 
