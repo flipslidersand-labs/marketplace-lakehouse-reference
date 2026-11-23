@@ -21,7 +21,6 @@ Versioning: [Semantic Versioning](https://semver.org/)
 - Delta Lake operations module covering `MERGE` upsert, `OPTIMIZE`/`ZORDER`, `VACUUM`, table history and time travel, with tests for idempotent replay (#2).
 - GitHub Actions CI with a Delta JAR cache and a CI badge, a `GATE_RUNNER` variable for the runner selection, and a Python test and lint gate (#3).
 - Documentation: customer scenario, architecture, technical evaluation and workshop guide, plus a README rewritten for readability and a stated release type (`reference`) (#17).
-- `AGENTS.md` with contributor guidance for coding agents.
 
 ### Security
 
